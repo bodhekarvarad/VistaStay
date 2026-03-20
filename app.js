@@ -10,7 +10,7 @@ const ejsMate=require('ejs-mate');
 const wrapAsync=require('./utils/wrapAsync');
 const ExpressError=require('./utils/ExpressError');
 const  listingSchema  = require('./schema');
-
+const Review=require('./models/review');
 
 
 app.listen(port,()=>{console.log(`Server running on port ${port}`);});
@@ -129,7 +129,16 @@ console.log(deletedlisting);
 res.redirect("/listings");
 }));    
 
-
+//Reviews 
+//Post route for creating a new review for a listing
+app.post("/listings/:id/reviews",wrapAsync(async(req,res)=>{
+    let listing=await Listing.findById(req.params.id);
+    let newReview=new Review(req.body.review);
+    listing.reviews.push(newReview);
+   await newReview.save();
+    await listing.save();
+    res.redirect(`/listings/${listing._id}`);
+}));
 
 
 app.all("*",(req,res,next)=>{ 
