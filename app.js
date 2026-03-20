@@ -9,7 +9,7 @@ const Listing = require('./models/listing');
 const ejsMate=require('ejs-mate');
 const wrapAsync=require('./utils/wrapAsync');
 const ExpressError=require('./utils/ExpressError');
-const  listingSchema  = require('./schema');
+const  {listingSchema,reviewSchema}  = require('./schema');
 const Review=require('./models/review');
 
 
@@ -69,6 +69,17 @@ const validateListing=(req,res,next)=>{
         next();
       }
     }
+const validateReview=(req,res,next)=>{
+    let {error}=reviewSchema.validateAsync(req.body);
+      
+      console.log(error);
+      if(error){
+        let msg=error.details.map(el=>el.message).join(",");
+        throw new ExpressError(400,msg);
+      }else{
+        next();
+      }
+    }
 
 // NEW ROUTE
 app.get("/listings/new", (req, res) => {
@@ -79,7 +90,7 @@ app.get("/listings/new", (req, res) => {
 // SHOW ROUTE
 app.get("/listings/:id", wrapAsync(async (req, res) => {
     const { id } = req.params;
-    const listing = await Listings.findById(id);
+    const listing = await Listings.findById(id).populate("reviews");
     res.render("listings/show", { listing });
 }));
 
@@ -131,7 +142,7 @@ res.redirect("/listings");
 
 //Reviews 
 //Post route for creating a new review for a listing
-app.post("/listings/:id/reviews",wrapAsync(async(req,res)=>{
+app.post("/listings/:id/reviews",validateReview,wrapAsync(async(req,res)=>{
     let listing=await Listing.findById(req.params.id);
     let newReview=new Review(req.body.review);
     listing.reviews.push(newReview);
@@ -140,7 +151,13 @@ app.post("/listings/:id/reviews",wrapAsync(async(req,res)=>{
     res.redirect(`/listings/${listing._id}`);
 }));
 
-
+//delete route for deleting a review
+app.delete("/listings/:id/reviews/:reviewId",wrapAsync(async(req,res)=>{
+    let {id,reviewId}=req.params;
+    await Listing.findByIdAndUpdate(id,{$pull:{reviews:reviewId}});
+   await Review.findByIdAndDelete(reviewId);
+    res.redirect(`/listings/${id}`);
+}));
 app.all("*",(req,res,next)=>{ 
     next(new ExpressError(404,"Page Not Found"));
  });
