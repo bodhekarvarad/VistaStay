@@ -12,6 +12,7 @@ const listingSchema = new Schema({
       "https://images.unsplash.com/photo-1620127682229-33388276e540?q=80&w=791&auto=format&fit=crop",
   },
   country: String,
+  reviews: [{ type: Schema.Types.ObjectId, ref: "Review" }],
 });
 
 module.exports = mongoose.model("Listing", listingSchema);
