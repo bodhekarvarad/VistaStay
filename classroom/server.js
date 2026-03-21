@@ -4,6 +4,8 @@ const userRoutes=require('./routes/user');
 const postRoutes=require('./routes/post');
 const cookieParser=require('cookie-parser');
 const session=require('express-session');
+const flash=require('connect-flash');
+const path=require('path');
 // app.use(cookieParser());
 // app.use('/posts',postRoutes);
 // app.use('/users',userRoutes);
@@ -45,6 +47,7 @@ const session=require('express-session');
 // app.get('/test',(req,res)=>{
 //     res.send("Session test");
 // });
+app.use(flash());
 
 const sessionOptions={
     secret:'mysecret',
@@ -53,20 +56,35 @@ const sessionOptions={
   
 };
 app.use(session(sessionOptions));
+app.set('view engine','ejs');
+app.set("view engine","ejs");
+
+app.set("views",path.join(__dirname,"views"));
+app.use(express.urlencoded({ extended: true }));
+app.use((req,res,next)=>{
+    res.locals.success=req.flash('success');
+    res.locals.error=req.flash('error');
+    next();
+});
 
 app.get('/register',(req,res)=>{
 let {
 name='anonymous'}=req.query;
 req.session.name=name;
-console.log(req.session.name);
-res.send(`Welcome ${name}`);
+if(!name=='anonymous'){
+req.flash("success",`Welcome ${name}`);
+}else{
+req.flash('error',`Something went wrong`);
+}
 res.redirect('/hello');
 });
 
 app.get('/hello',(req,res)=>{
-    res.send(`Hello World ${req.session.name}`);
+    res.locals.success=req.flash('success');
+    res.locals.error=req.flash('error');
+   res.render('page.ejs',{name:req.session.name,success:req.flash('success')});
 })
 
 app.listen(3000,()=>{
     console.log('Server running on port 3000');
-}   );
+});
