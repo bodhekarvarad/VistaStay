@@ -16,7 +16,9 @@ const reviewRoutes=require('./routers/reviews');
 const review = require('./models/review');
 
 
-app.listen(port,()=>{console.log(`Server running on port ${port}`);});
+app.listen(port,()=>{
+    console.log(`Server running on port ${port}`);
+});
 
 app.get('/',(req,res)=>{
     res.send('I am route');
@@ -62,7 +64,7 @@ app.use(methodOverride("_method"));
 
 
    app.use('/listings',listingRoutes);
-   app.use('/listings/:id/reviews',reviewRoutes)
+   app.use('/listings/:id/reviews',reviewRoutes);
 app.all("*",(req,res,next)=>{ 
     next(new ExpressError(404,"Page Not Found"));
  });
