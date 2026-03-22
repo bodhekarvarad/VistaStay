@@ -3,10 +3,10 @@ const router = express.Router();
 const wrapAsync=require('../utils/wrapAsync');
 const  {listingSchema,reviewSchema}  = require('../schema');
 const ExpressError=require('../utils/ExpressError');
-const Listings=require('../models/listing');
+const Listing=require('../models/listing');
 
 const validateListing=(req,res,next)=>{
-    let {error}=listingSchema.validateAsync(req.body);
+    let {error}=listingSchema.validate(req.body);
       
       console.log(error);
       if(error){
@@ -20,7 +20,7 @@ const validateListing=(req,res,next)=>{
 // Get all listings
 //index route
 router.get("/", wrapAsync(async (req, res) => {
-    const allListings = await Listings.find({});
+    const allListings = await Listing.find({});
     res.render("listings/index", { allListings });
 }));
 
@@ -32,34 +32,22 @@ router.get("/new", (req, res) => {
 // SHOW ROUTE
 router.get("/:id", wrapAsync(async (req, res) => {
     const { id } = req.params;
-    const listing = await Listings.findById(id).populate("reviews");
+    const listing = await Listing.findById(id).populate("reviews");
     if (!listing) {
         req.flash("error","Cannot find that listing");
        res.redirect("/listings");
     }
     res.render("listings/show", { listing });
+   
 }));
 
 
 //create route
 router.post("/",validateListing, wrapAsync (async(req, res,next) => {
-//   try {
-      let result=listingSchema.validateAsync(req.body);
-      
-      console.log(result);
-      if(result.error){
-        throw new ExpressError(400,result.error);
-      }
-      const newListing = new Listing(req.body.listing);
-    
+    const newListing = new Listing(req.body.listing);
     await newListing.save();
     req.flash("success","Successfully created a new listing");
     res.redirect("/listings");
-
-//   } catch (err) {
-//     next(err);
-//          //  redirect like lecture
-//   }
 })
 );
 
@@ -79,11 +67,17 @@ router.get("/:id/edit",
 }));
 //update route
 router.put("/:id",validateListing,wrapAsync(async(req,res)=>{
-let {id}=req.params;
- console.log(req.body.listing); 
-await Listing.findByIdAndUpdate(id,{...req.body.listing});
-req.flash("success","Successfully updated the listing");
-res.redirect("/listings");
+ const { id } = req.params;
+
+    if (!req.body.listing) {
+        throw new ExpressError(400, "Invalid listing data");
+    }
+
+    await Listing.findByIdAndUpdate(id, { ...req.body.listing });
+
+    req.flash("success", "Successfully updated the listing");
+
+    res.redirect(`/listings/${id}`);
 }));
  
 //delete route
