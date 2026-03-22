@@ -15,7 +15,10 @@ const flash=require('connect-flash');
 const Listing = require('./models/listing');
 const Review = require('./models/review');
 const router= express.Router({mergeParams:true});
-
+const passport=require('passport');
+const LocalStrategy=require('passport-local');
+const User=require('./models/user');
+const userRoutes=require('./routers/user');
 
 app.listen(port,()=>{
     console.log(`Server running on port ${port}`);
@@ -33,6 +36,13 @@ const sessionOptions={
 
 app.use(session(sessionOptions));
 app.use(flash());
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());                                                           
+
+
 app.get('/',(req,res)=>{
     res.send('I am route');
 });
@@ -78,9 +88,17 @@ app.use((req,res,next)=>{
     res.locals.error=req.flash("error");
     next();
 });
+// app.get('/demouser',async(req,res)=>{
+//   let fakerUser=new User({
+//     username:"demoUser",
+//     email:"student@gmail.com"
+//   });
+// let registeredUser=  await User.register(fakerUser,"password");
+// res.send(registeredUser);
 
 
-
+// });
+app.use('/',userRoutes);
    app.use('/listings',listingRoutes);
    app.use('/listings/:id/reviews',reviewRoutes);
 app.all("*",(req,res,next)=>{ 
