@@ -14,12 +14,23 @@ const Review=require('./models/review');
 const listingRoutes=require('./routers/listing');
 const reviewRoutes=require('./routers/reviews');
 const review = require('./models/review');
-
-
+const session=require('express-session');
+const flash=require('connect-flash');
 app.listen(port,()=>{
     console.log(`Server running on port ${port}`);
 });
+const sessionOptions={  
+    secret:'thisshouldbeabettersecret',
+    resave:false,
+    saveUninitialized:true,
+    cookie:{
+        expires:Date.now(),
+        maxAge:1000*60*60*24*7,
+        httpOnly:true,
+    }
+};
 
+app.use(session(sessionOptions));
 app.get('/',(req,res)=>{
     res.send('I am route');
 });
@@ -57,9 +68,13 @@ app.set("views",path.join(__dirname,"views"));
 app.use(express.urlencoded({ extended: true }));
 
 app.use(methodOverride("_method"));
+app.use(flash());
 
-
-
+app.use((req,res,next)=>{
+    res.locals.success=req.flash("success");
+   res.locals.error=req.flash("error");
+    next();
+});
 
 
 
