@@ -1,21 +1,22 @@
 const express=require('express');
 const app=express();
 const port=3000;
-const Listings=require('./models/listing');
 const mongoose=require('mongoose');
 const path=require('path');
 const methodOverride=require("method-override");
-const Listing = require('./models/listing');
 const ejsMate=require('ejs-mate');
 const wrapAsync=require('./utils/wrapAsync');
 const ExpressError=require('./utils/ExpressError');
 const  {listingSchema,reviewSchema}  = require('./schema');
-const Review=require('./models/review');
 const listingRoutes=require('./routers/listing');
 const reviewRoutes=require('./routers/reviews');
-const review = require('./models/review');
 const session=require('express-session');
 const flash=require('connect-flash');
+const Listing = require('./models/listing');
+const Review = require('./models/review');
+const router= express.Router({mergeParams:true});
+
+
 app.listen(port,()=>{
     console.log(`Server running on port ${port}`);
 });
@@ -24,13 +25,14 @@ const sessionOptions={
     resave:false,
     saveUninitialized:true,
     cookie:{
-        expires:Date.now(),
+        expires:Date.now()+1000*60*60*24*7,
         maxAge:1000*60*60*24*7,
         httpOnly:true,
     }
 };
 
 app.use(session(sessionOptions));
+app.use(flash());
 app.get('/',(req,res)=>{
     res.send('I am route');
 });
@@ -61,18 +63,19 @@ async function main() {
 //     res.send("Sample listing saved successfully");
 // });
 app.use(express.static(path.join(__dirname,"public")));
+
 app.engine("ejs",ejsMate);
 app.set("view engine","ejs");
 
 app.set("views",path.join(__dirname,"views"));
 app.use(express.urlencoded({ extended: true }));
-
+app.use(express.json());
 app.use(methodOverride("_method"));
-app.use(flash());
+
 
 app.use((req,res,next)=>{
     res.locals.success=req.flash("success");
-   res.locals.error=req.flash("error");
+    res.locals.error=req.flash("error");
     next();
 });
 
