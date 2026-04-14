@@ -22,9 +22,10 @@
 
         <div class="card-body">
           <p class="card-text text-muted">
-            <%= listing.description %>
+            <li><%= listing.owner.username %></li>
+           
           </p>
-
+          <p> <%= listing.description %></p>
           <p class="card-text">
             <strong>Price:</strong> ₹<%= listing.price %> <br>
             <strong>Location:</strong> <%= listing.location %> <br>
