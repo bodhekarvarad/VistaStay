@@ -86,6 +86,7 @@ app.use(methodOverride("_method"));
 app.use((req,res,next)=>{
     res.locals.success=req.flash("success");
     res.locals.error=req.flash("error");
+    res.locals.currUser=req.user;
     next();
 });
 // app.get('/demouser',async(req,res)=>{
@@ -97,7 +98,7 @@ app.use((req,res,next)=>{
 // res.send(registeredUser);
 
 
-// });
+// }); 
 app.use('/',userRoutes);
    app.use('/listings',listingRoutes);
    app.use('/listings/:id/reviews',reviewRoutes);
