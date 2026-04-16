@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const Review = require("./review");
+const { required } = require("joi");
 
 
 
@@ -19,6 +20,7 @@ const listingSchema = new Schema({
 owner:{
   type:mongoose.Schema.Types.ObjectId,
   ref:'User',
+  required:true
 
 },
 });
