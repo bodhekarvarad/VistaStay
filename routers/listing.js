@@ -7,32 +7,33 @@ const Listing=require('../models/listing');
 const{isLoggedIn,isOwner,validateListing}=require('../middleware');
 const listingController=require('../controllers/listings');
 // Get all listings
-//index route
-router.get("/", wrapAsync(listingController.index));
 
+router.route("/")
+.get(wrapAsync(listingController.index))
+.post(isLoggedIn,
+   validateListing, 
+   wrapAsync (listingController.createListing)
+);
 // NEW ROUTE
 router.get("/new",isLoggedIn, listingController.newRoute);
 
-// SHOW ROUTE
-router.get("/:id", wrapAsync((listingController.showListing)   ));
+router.route("/:id")
+.get(wrapAsync(listingController.showListing))
+.put(isLoggedIn,isOwner,validateListing,wrapAsync(listingController.updateListing))
+.delete(isLoggedIn,isOwner,wrapAsync(listingController.deleteListing));
 
 
 
-//create route
-router.post("/",isLoggedIn,validateListing, wrapAsync (listingController.createListing)
-);
 
 
-    
+
+
+
 
 //edit route
 router.get("/:id/edit",isLoggedIn,isOwner,(listingController.editRoute)
    );
-//update route
-router.put("/:id",isLoggedIn,isOwner,validateListing,wrapAsync(listingController.updateListing));
- 
-//delete route
-router.delete("/:id",isLoggedIn,isOwner,wrapAsync(listingController.deleteListing)); 
+
 
 
 module.exports=router;
