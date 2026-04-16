@@ -15,20 +15,17 @@ main().catch(err => {
 });
 
 const initDB = async () => {
-  const initData = data; // Assuming data is an object with a 'data' property containing the listings array
+   // Assuming data is an object with a 'data' property containing the listings array
   // remove old data
   await Listing.deleteMany({});
- initData.data =initData.data.map((obj) => ({
-
-    ...obj,
-    owner: "64a1c8e5b9c0f2b1d8e4f123" // Replace with the actual user ID
-  })); 
+  
 
      // Replace with the actual user ID)
   // FIX image object -> image URL string
-  const fixedData = data.data.map(listing => ({
-    ...listing,
-    image: listing.image.url,
+  const fixedData = data.data.map(obj => ({
+    ...obj,
+    owner:new mongoose.Types.ObjectId("64a1c8e5b9c0f2b1d8e4f123"),
+    image: obj.image.url,
   }));
 
   // insert all listings
