@@ -1,73 +1,102 @@
 const Listing = require("../models/listing");
 
-
-
-module.exports.index=async (req, res) => {
-    const allListings = await Listing.find({});
-    res.render("listings/index", { allListings });
+// INDEX
+module.exports.index = async (req, res) => {
+const allListings = await Listing.find({});
+return res.render("listings/index", { allListings });
 };
 
-module.exports.newRoute=(req, res) => {
-    
-    res.render("listings/new");
+// NEW
+module.exports.newRoute = (req, res) => {
+return res.render("listings/new");
 };
 
-module.exports.showListing=async (req, res) => {
-    const { id } = req.params;
-    const listing = await Listing.findById(req.params.id)
+// SHOW
+module.exports.showListing = async (req, res) => {
+const { id } = req.params;
+
+
+const listing = await Listing.findById(id)
     .populate({
-        path:"reviews", 
-        populate:{ path: "author" },
+        path: "reviews",
+        populate: { path: "author" },
     })
     .populate("owner");
-    if (!listing) {
-        req.flash("error","Cannot find that listing");
-       res.redirect("/listings");
-    }
-    console.log(listing);
-    res.render("listings/show", { listing });
-   
+
+if (!listing) {
+    req.flash("error", "Cannot find that listing");
+    return res.redirect("/listings");
+}
+
+return res.render("listings/show", { listing });
+
+
 };
 
-module.exports.createListing=async(req, res,next) => {
-    const newListing = new Listing(req.body.listing);
-    console.log(req.user);
-    newListing.owner=req.user._id;
-    await newListing.save();
-    req.flash("success","Successfully created a new listing");
-    res.redirect("/listings");
+// CREATE
+module.exports.createListing = async (req, res) => {
+
+
+if (!req.file) {
+    req.flash("error", "Image is required");
+    return res.redirect("/listings/new");
+}
+
+const url = req.file.path;
+const filename = req.file.filename;
+
+const newListing = new Listing(req.body.listing);
+newListing.owner = req.user._id;
+newListing.image = { url, filename };
+
+await newListing.save();
+
+req.flash("success", "Successfully created a new listing");
+return res.redirect("/listings");
+
 };
 
-module.exports.editRoute= async (req, res) => {
-    const { id } = req.params;
-    const listing = await Listing.findById(id);
-    if(!listing){
-        req.flash("error","Cannot find that listing");
-       return res.redirect("/listings");
-    }
-    res.render("listings/edit", { listing });
+// EDIT
+module.exports.editRoute = async (req, res) => {
+const { id } = req.params;
+
+const listing = await Listing.findById(id);
+
+if (!listing) {
+    req.flash("error", "Cannot find that listing");
+    return res.redirect("/listings");
+}
+
+return res.render("listings/edit", { listing });
+
 };
 
-module.exports.updateListing=async(req,res)=>{
- const { id } = req.params;
+// UPDATE
+module.exports.updateListing = async (req, res) => {
+const { id } = req.params;
 
-    if (!req.body.listing) {
-        throw new ExpressError(400, "Invalid listing data");
-    }
 
-    
+if (!req.body.listing) {
+    req.flash("error", "Invalid listing data");
+    return res.redirect("/listings");
+}
 
-    await Listing.findByIdAndUpdate(id, { ...req.body.listing });
+await Listing.findByIdAndUpdate(id, { ...req.body.listing });
 
-    req.flash("success", "Successfully updated the listing");
+req.flash("success", "Successfully updated the listing");
+return res.redirect(`/listings/${id}`);
 
-    res.redirect(`/listings/${id}`);
+
 };
 
-module.exports.deleteListing=async(req,res)=>{
-let {id}=req.params;
-let deletedlisting=await Listing.findByIdAndDelete(id);
-console.log(deletedlisting);
-req.flash("success","Successfully deleted the listing");
-res.redirect("/listings");
+// DELETE
+module.exports.deleteListing = async (req, res) => {
+const { id } = req.params;
+
+
+await Listing.findByIdAndDelete(id);
+
+req.flash("success", "Successfully deleted the listing");
+return res.redirect("/listings");
+
 };
