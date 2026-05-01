@@ -25,7 +25,11 @@ const initDB = async () => {
   const fixedData = data.data.map(obj => ({
     ...obj,
     owner:new mongoose.Types.ObjectId("64a1c8e5b9c0f2b1d8e4f123"),
-    image: obj.image.url,
+    image:{
+   url: obj.image.url,
+   filename: obj.image.filename || "listingimage"
+  
+    } 
   }));
 
   // insert all listings
