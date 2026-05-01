@@ -3,8 +3,8 @@ const Joi = require("joi");
 const listingSchema = Joi.object({
     listing: Joi.object({
         title: Joi.string().required(),
-        description: Joi.string().max(500).required(),
-        image: Joi.string().uri().allow("", null),
+        description: Joi.string().required(),
+        // image: Joi.string().required(),
         price: Joi.number().min(0).required(),
         country: Joi.string().required(),
         location: Joi.string().max(100).required()
