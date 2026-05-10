@@ -24,7 +24,7 @@ const initDB = async () => {
   // FIX image object -> image URL string
   const fixedData = data.data.map(obj => ({
     ...obj,
-    owner:new mongoose.Types.ObjectId("64a1c8e5b9c0f2b1d8e4f123"),
+    owner:new mongoose.Types.ObjectId("6a001861b243ff3c01f19a9c"),
     image:{
    url: obj.image.url,
    filename: obj.image.filename || "listingimage"
