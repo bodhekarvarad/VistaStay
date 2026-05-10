@@ -24,7 +24,7 @@ owner:{
   required:true
 
 },
-geomatry: {
+geometry: {
 type: {
   type: String,
   enum: ["Point"],
