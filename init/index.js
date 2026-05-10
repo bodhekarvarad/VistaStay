@@ -1,41 +1,60 @@
+require("dotenv").config();
+
 const mongoose = require("mongoose");
-const data = require("./data");
+
+const mbxGeocoding = require("@mapbox/mapbox-sdk/services/geocoding");
+
 const Listing = require("../models/listing");
 
-// database connection
-const MONGO_URI = "mongodb://127.0.0.1:27017/wanderlustdb";
+const initData = require("./data.js");
 
-async function main() {
-  await mongoose.connect(MONGO_URI);
-  console.log("Connected to MongoDB");
-}
+const mapToken = process.env.MAPBOX_TOKEN;
 
-main().catch(err => {
-  console.error("Error connecting to MongoDB:", err);
+const geocodingClient = mbxGeocoding({
+    accessToken: mapToken,
 });
 
+const MONGO_URI = "mongodb://127.0.0.1:27017/wanderlustdb";
+
+main()
+    .then(() => {
+        console.log("Connected to DB");
+    })
+    .catch((err) => {
+        console.log(err);
+    });
+
+async function main() {
+    await mongoose.connect(MONGO_URI);
+}
+
 const initDB = async () => {
-   // Assuming data is an object with a 'data' property containing the listings array
-  // remove old data
-  await Listing.deleteMany({});
-  
 
-     // Replace with the actual user ID)
-  // FIX image object -> image URL string
-  const fixedData = data.data.map(obj => ({
-    ...obj,
-    owner:new mongoose.Types.ObjectId("6a001861b243ff3c01f19a9c"),
-    image:{
-   url: obj.image.url,
-   filename: obj.image.filename || "listingimage"
-  
-    } 
-  }));
+    await Listing.deleteMany({});
 
-  // insert all listings
-  await Listing.insertMany(fixedData);
+    const listingsWithGeometry = await Promise.all(
+        initData.data.map(async (obj) => {
 
-  console.log("Database initialized with sample data");
+            let response = await geocodingClient
+                .forwardGeocode({
+                    query: obj.location,
+                    limit: 1,
+                })
+                .send();
+
+            return {
+                ...obj,
+
+                owner: "69de2bddfa28adf264acfb93",
+
+                geometry: response.body.features[0].geometry,
+            };
+        })
+    );
+
+    await Listing.insertMany(listingsWithGeometry);
+
+    console.log("Data initialized");
 };
 
 initDB();
