@@ -49,9 +49,9 @@ passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());                                                           
 
 
-app.get('/',(req,res)=>{
-    res.send('I am route');
-});
+// app.get('/',(req,res)=>{
+//     res.send('I am route');
+// });
 //database connection
 const MONGO_URI='mongodb://127.0.0.1:27017/wanderlustdb';
 main().then(()=>{
