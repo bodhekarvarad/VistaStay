@@ -53,7 +53,7 @@ passport.deserializeUser(User.deserializeUser());
 //     res.send('I am route');
 // });
 //database connection
-const MONGO_URI='mongodb://127.0.0.1:27017/wanderlustdb';
+const MONGO_URI=process.env.ATLASDB_URL;
 main().then(()=>{
     console.log('Connected to MongoDB');
 }).catch((err)=>{
